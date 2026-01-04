@@ -1,3 +1,5 @@
+//Module ALU
+
 module ALU #(
     parameter DATA_WIDTH = 4
 ) (
