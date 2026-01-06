@@ -1,0 +1,78 @@
+library IEEE;
+use IEEE.NUMERIC_STD.ALL;
+use IEEE.STD_LOGIC_1164.ALL;
+
+entity debouncer_tb is 
+
+end debouncer_tb;
+
+architecture tb of debouncer_tb is 
+
+ -- Component decleration
+component debouncer_pulse
+port(
+        clk , arst_n : in std_logic;
+        d : in  std_logic;
+        q : out std_logic
+    );
+  end component;
+
+  signal  clk_tb: std_logic :='0';
+  signal  arst_n_tb: std_logic :='0';
+  signal  d_tb:   STD_LOGIC;
+  signal  q_tb:   std_logic; 
+  
+begin 
+
+  DUT: debouncer_pulse
+   port map (
+     clk=>clk_tb,
+     arst_n=>arst_n_tb,
+     d => d_tb,
+     q => q_tb
+    
+   );
+
+clk_proc: process
+     begin
+      clk_tb<= not clk_tb;
+      wait for 5 ns;   
+     end process;
+
+clk_stop: process
+     begin      
+     wait for 1000 ns;
+       std.env.stop;
+       wait;
+     end process;
+       
+   stim_proc: process
+     begin
+      arst_n_tb<='0';
+      d_tb<= '0';
+      wait for 10 ns;
+      arst_n_tb<='1';
+      wait for 10 ns;
+      d_tb<= '0';
+      for i in 0 to 15 loop
+        if((i mod 3) = 0) then
+      d_tb <= not d_tb;
+      end if;
+       wait for 10 ns;
+       end loop;  
+
+       for i in 0 to 15 loop
+        if((i mod 2) = 0) then
+      d_tb <= not d_tb;
+      end if;
+       wait for 10 ns;
+       end loop;  
+ 	for i in 0 to 15 loop
+        if((i mod 5) = 0) then
+      d_tb <= not d_tb;
+      end if;
+       wait for 10 ns;
+       end loop;  
+       wait; 
+     end process;
+end tb;
