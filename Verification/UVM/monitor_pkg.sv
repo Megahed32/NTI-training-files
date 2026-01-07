@@ -38,7 +38,7 @@ class my_monitor extends uvm_monitor;
 
         forever begin
             
-            my_sequence_item tr = my_sequence_item::type_id::create("tr"); 
+            my_sequence_item seq_item = my_sequence_item::type_id::create("seq_item"); 
             @(posedge vif_monitor.clk);
             // 1. Reset Logic
             if(!vif_monitor.rst) begin
@@ -50,13 +50,13 @@ class my_monitor extends uvm_monitor;
             // Note: Mutually exclusive 'en' and 're' means only one block here executes
             if (vif_monitor.en || (vif_monitor.re && !vif_monitor.valid_out)) begin
             
-                tr.addr    = vif_monitor.addr;
-                tr.data_in = vif_monitor.data_in;
-                tr.en      = vif_monitor.en;
-                tr.re      = vif_monitor.re;
-                tr.rst     = vif_monitor.rst;
-                tr.valid_out = vif_monitor.valid_out;
-                tr.data_out  = vif_monitor.data_out;
+                seq_item.addr    = vif_monitor.addr;
+                seq_item.data_in = vif_monitor.data_in;
+                seq_item.en      = vif_monitor.en;
+                seq_item.re      = vif_monitor.re;
+                seq_item.rst     = vif_monitor.rst;
+                seq_item.valid_out = vif_monitor.valid_out;
+                seq_item.data_out  = vif_monitor.data_out;
                 if (vif_monitor.re) addr_q.push_back(vif_monitor.addr);
             end
 
@@ -64,19 +64,19 @@ class my_monitor extends uvm_monitor;
             if (vif_monitor.valid_out) begin
                 if (addr_q.size() > 0) begin 
                     if (vif_monitor.re) addr_q.push_back(vif_monitor.addr); // Re-add for multiple reads
-                    tr.addr_read     = addr_q.pop_front();
-                    tr.addr          = vif_monitor.addr;
-                    tr.data_in       = vif_monitor.data_in;
-                    tr.data_out  = vif_monitor.data_out;
-                    tr.valid_out = vif_monitor.valid_out;
-                    tr.re        = vif_monitor.re;
-                    tr.en        = vif_monitor.en;
-                    tr.rst       = vif_monitor.rst;
+                    seq_item.addr_read     = addr_q.pop_front();
+                    seq_item.addr          = vif_monitor.addr;
+                    seq_item.data_in       = vif_monitor.data_in;
+                    seq_item.data_out  = vif_monitor.data_out;
+                    seq_item.valid_out = vif_monitor.valid_out;
+                    seq_item.re        = vif_monitor.re;
+                    seq_item.en        = vif_monitor.en;
+                    seq_item.rst       = vif_monitor.rst;
                 end else begin
                     `uvm_error("MON", "Unexpected valid_out detected")
                 end
             end
-            monitor_ap.write(tr);
+            monitor_ap.write(seq_item);
         end
 
     endtask
