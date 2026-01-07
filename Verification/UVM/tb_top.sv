@@ -2,7 +2,7 @@
 
 module top();
  import uvm_pkg::*;
- import classes_pkg::*;
+ import test_pkg::*;
   my_test test;
 
   logic clk;
