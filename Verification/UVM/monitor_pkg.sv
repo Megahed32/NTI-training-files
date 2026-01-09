@@ -6,7 +6,7 @@ package monitor_pkg;
 import uvm_pkg::*;
 import transaction_pkg::*;
 import shared_pkg::*;
-
+int address_queue_count;
 class my_monitor extends uvm_monitor;
     
     `uvm_component_utils(my_monitor);
@@ -39,10 +39,19 @@ class my_monitor extends uvm_monitor;
         forever begin
             
             my_sequence_item seq_item = my_sequence_item::type_id::create("seq_item"); 
+            address_queue_count = addr_q.size();
             @(posedge vif_monitor.clk);
             // 1. Reset Logic
             if(!vif_monitor.rst) begin
                 addr_q.delete();
+                seq_item.addr    = vif_monitor.addr;
+                seq_item.data_in = vif_monitor.data_in;
+                seq_item.en      = vif_monitor.en;
+                seq_item.re      = vif_monitor.re;
+                seq_item.rst     = vif_monitor.rst;
+                seq_item.valid_out = vif_monitor.valid_out;
+                seq_item.data_out  = vif_monitor.data_out;
+                monitor_ap.write(seq_item);
                 continue; // Skip the rest of the loop during reset
             end
 

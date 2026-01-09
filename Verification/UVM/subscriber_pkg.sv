@@ -14,7 +14,7 @@ class my_subscriber extends uvm_subscriber #(my_sequence_item);
       data_in_cp : coverpoint seq_item.data_in;
       en_cp : coverpoint seq_item.en;
       re_cp : coverpoint seq_item.re;
-
+      
     endgroup
 
 

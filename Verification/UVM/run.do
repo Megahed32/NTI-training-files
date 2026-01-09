@@ -6,4 +6,6 @@ vsim -voptargs=+acc work.top -gui
 add wave -position insertpoint sim:/top/intf1/*
 add wave -position insertpoint  \
 sim:/scoreboard_pkg::memory_simulation
+add wave -position insertpoint  \
+sim:/monitor_pkg::address_queue_count
 run -all

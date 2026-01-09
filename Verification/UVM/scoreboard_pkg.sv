@@ -2,7 +2,8 @@
 package scoreboard_pkg;
 import transaction_pkg::*;
 import uvm_pkg::*;
-import shared_pkg::*;
+
+int error_count , correct_count;
 logic [31:0] memory_simulation [16];
 
 class my_sb extends uvm_scoreboard;
@@ -43,7 +44,7 @@ class my_sb extends uvm_scoreboard;
         sb_fifo.get_peek_export.get(seq_item); 
         check_result(seq_item);
         // Fix: Call convert2string ON THE ITEM, not the scoreboard
-        `uvm_info("Scoreboard", seq_item.convert2string(), UVM_LOW);
+        `uvm_info("Scoreboard", seq_item.convert2string(), UVM_MEDIUM);
 
     end
 endtask
@@ -58,9 +59,11 @@ endtask
         if(seq_item.valid_out) begin
             // Read operation
         if(seq_item.data_out !=memory_simulation[seq_item.addr_read]) begin
+            error_count++;
             `uvm_error("DATA_MISMATCH", $sformatf("At time %t: Read data %0d does not match expected data %0d at address %0d", $time, seq_item.data_out, memory_simulation[seq_item.addr_read], seq_item.addr_read));
         end else begin
-            `uvm_info("DATA_MATCH", $sformatf("At time %t: Read data %0d matches expected data at address %0d", $time, seq_item.data_out, seq_item.addr_read), UVM_LOW);
+            correct_count++;
+            `uvm_info("DATA_MATCH", $sformatf("At time %t: Read data %0d matches expected data at address %0d", $time, seq_item.data_out, seq_item.addr_read), UVM_MEDIUM);
         end
      end
 

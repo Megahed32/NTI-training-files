@@ -25,6 +25,10 @@ always @(posedge clk) begin
       data_out <= mem[addr]; // Assign output data from memory location 
         valid_out <= 'h1; // Set output validity to one 
     end 
+    else
+    begin
+      valid_out <= 'h0;
+    end
 end
 
 endmodule
