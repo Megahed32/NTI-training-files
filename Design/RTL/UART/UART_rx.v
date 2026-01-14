@@ -4,12 +4,15 @@ module UART_rx #(
 (
     input wire rx , clk , arst_n,
     output reg [7:0] data_sipo,
-    output reg done
+    output reg done , error ;
 );
-    // edge detector registers
-    reg rx_reg , start;
+    // edge detector signals
+    reg rx_reg ;
+    wire start;
+
     // counters
-    reg [$clog2(CLKS_PER_BIT)-1:0] baud_counter;
+    localparam CLKS_PER_BIT_SAMPLING = $rtoi($ceil(1.5 * CLKS_PER_BIT)); 
+    reg [$clog2(CLKS_PER_BIT_SAMPLING)-1:0] baud_counter;
     reg [2:0] bit_counter;
 //states
 
@@ -40,7 +43,7 @@ module UART_rx #(
     case (cs)
       IDLE :   ns = (start) ? START : IDLE;
 
-      START :  ns = (baud_counter < 1.5*(CLKS_PER_BIT-1)) ? START : RX_DATA;
+      START :  ns = (baud_counter < (1.5*(CLKS_PER_BIT)-1)) ? START : RX_DATA;
 
       RX_DATA: ns = ((bit_counter == 7) && (baud_counter == CLKS_PER_BIT-1)) ?  STOP: RX_DATA ;
 
@@ -63,30 +66,40 @@ module UART_rx #(
         data_sipo <= 0 ;
         baud_counter <= 0;
         bit_counter  <= 0;
+        done <= 0 ;
+        error <= 0 ;
     end
     else
     begin
         case (cs)
       START : 
       begin
-        data_sipo[bit_counter] <= rx;
-        if(baud_counter < 1.5*(CLKS_PER_BIT)-1)
+
+        if(baud_counter < (1.5*(CLKS_PER_BIT)-1))
           baud_counter <= baud_counter + 1;
-          else
+
+        else
         begin
             baud_counter <= 0;
-      end  
+        end  
+        done <= 0 ;
+        error <= 0;
       end
+
+
       RX_DATA: 
       begin
+        if(baud_counter == 0)
         data_sipo[bit_counter] <= rx;
         if(baud_counter < CLKS_PER_BIT-1)
           baud_counter <= baud_counter + 1;
           else
           begin
-            baud_counter <= 0;
-          bit_counter <= bit_counter + 1; 
+             baud_counter <= 0;
+             bit_counter <= bit_counter + 1; 
           end
+          done <= 0 ;
+          error <= 0;
       end  
 
 
@@ -94,13 +107,25 @@ module UART_rx #(
       begin
         if(baud_counter <(CLKS_PER_BIT)-1)
           baud_counter <= baud_counter + 1;
-          else
+        else
         begin
             baud_counter <= 0;
-      end  
+        end  
+        done <= 0 ;
       end
-
-      default: ;
+        DONE:
+        begin
+            done <= 1 ;
+        end
+        ERR: 
+        begin
+            error <= 1 ;
+        end
+      default: 
+      begin 
+        done <= 0 ;
+        error <= 0;
+      end
     endcase
 
 
@@ -113,19 +138,19 @@ end
 
 
 //edge detector
+//detects start condition on rx_line
     
     always @(posedge clk or negedge arst_n) 
     begin
         if(!arst_n)
         begin
             rx_reg <= 0 ;
-            start <=  0 ;
         end
         else
         begin
             rx_reg <= rx;
         end
-        if(rx & ~rx_reg)
-          start <= 1;
     end
+
+    assign start = (!rx & rx_reg);
 endmodule

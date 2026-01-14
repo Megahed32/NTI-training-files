@@ -13,7 +13,7 @@ module top #(
     output wire        serial_data_out
 );
 
-    wire done;
+    wire done_tx , done_rx;
     wire [WIDTH-1:0] uart_tx_data;
     wire [WIDTH-1:0] control;
 
@@ -29,9 +29,10 @@ module top #(
         .rd_data(rd_data),
         .control(control),
         .busy(0),
-        .done(done),
+        .done(done_tx),
         .uart_rx_data(0),
-        .uart_tx_data(uart_tx_data)
+        .uart_tx_data(uart_tx_data),
+        .valid(done_rx)
     );
 
     // Instantiate UART_tx
@@ -42,6 +43,15 @@ module top #(
         .data_in(uart_tx_data),
         .serial_data_out(serial_data_out),
         .done(done)                    // we can ignore UART internal done here if not needed
+    );
+
+    // Instantiate UART_rx
+    UART_rx #(.CLKS_PER_BIT(CLKS_PER_BIT)) u_uart_rx (
+        .rx(serial_data_out),       // loopback for testing
+        .clk(clk),
+        .arst_n(rst_n),
+        .data_sipo(),               // not used in this top module
+        .done()                     // we can ignore UART internal done here if not needed
     );
 
 endmodule

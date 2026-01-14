@@ -1,8 +1,8 @@
 module register_file #(parameter WIDTH =8)(clk , arst_n , wr_en, rd_en , wr_addr ,
  rd_addr , wr_data , rd_data , control , 
- busy , done , uart_rx_data , uart_tx_data);
+ busy , done , uart_rx_data , uart_tx_data, valid);
 
- input clk , arst_n , wr_en , rd_en , busy ,done;
+ input clk , arst_n , wr_en , rd_en , busy ,done , valid;
  input [1:0] wr_addr , rd_addr;
  
  input  wire [WIDTH-1:0] wr_data , uart_rx_data;
@@ -12,7 +12,7 @@ module register_file #(parameter WIDTH =8)(clk , arst_n , wr_en, rd_en , wr_addr
 
  
 
- reg [WIDTH-1:0] data_tx_reg , control_reg , status_reg , data_rx_reg;
+ reg [WIDTH-1:0] data_tx_reg , control_reg , status_reg , data_rx_reg ;
 
  localparam CONTROL_ADDR = 0 ;
  localparam DATA_TX_ADDR = 1 ;
@@ -61,6 +61,8 @@ module register_file #(parameter WIDTH =8)(clk , arst_n , wr_en, rd_en , wr_addr
         end
 
         status_reg  <=  {{(WIDTH-2){1'b0}}, busy , done};
+
+        if(valid)
         data_rx_reg <=  uart_rx_data;
     end
     
